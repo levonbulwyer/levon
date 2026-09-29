@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athenaze — Greek reader (Ch. 2–16)</title>
+<style>
+  :root{
+    --gold:#C98A00; --gold-strong:#E8A400; --gold-tint:rgba(255,204,0,0.16); --gold-tint-strong:rgba(255,204,0,0.32);
+    --bg:#fbfbfa;
+    --text:#1c1c1e; --text-dim:#6e6e73; --text-faint:#aeaeb2;
+    --sep:rgba(60,60,67,0.13);
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+       max-width:760px;margin:0 auto;padding:0 20px 120px;color:var(--text);
+       background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:16px;}
+
+  header{text-align:center;padding:30px 0 14px;}
+  .kicker{font-size:0.72rem;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;font-weight:600;}
+  .title{font-size:1.6rem;margin:6px 0 4px;font-weight:700;letter-spacing:-0.01em;}
+  .sub{font-size:0.93rem;color:var(--text-dim);}
+
+  .howto{padding:12px 2px 16px;margin:0 0 6px;border-bottom:1px solid var(--sep);
+         font-size:0.86rem;color:var(--text-dim);line-height:1.55;}
+  .howto b{color:var(--text);font-weight:600;}
+
+  /* toolbar */
+  #nav{position:sticky;top:0;z-index:5;
+       background:rgba(251,251,250,0.84);backdrop-filter:blur(20px) saturate(1.4);
+       -webkit-backdrop-filter:blur(20px) saturate(1.4);
+       border-bottom:1px solid var(--sep);padding:9px 0;}
+  .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  #chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .chip{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;
+        padding:0 7px;border-radius:6px;font-size:0.78rem;font-weight:500;text-decoration:none;
+        color:var(--text);background:rgba(60,60,67,0.06);transition:background .12s;}
+  .chip:hover{background:var(--gold-strong);color:#fff;}
+  .chip-missing{color:var(--text-faint);background:transparent;cursor:default;}
+  #jumpBox{margin-left:auto;width:54px;padding:4px 8px;border:none;border-radius:6px;
+           font-family:inherit;font-size:0.84rem;background:rgba(60,60,67,0.07);color:var(--text);}
+  #jumpBox:focus{outline:2px solid var(--gold-strong);outline-offset:1px;background:#fff;}
+
+  /* macOS-style switch */
+  .switch{display:inline-flex;align-items:center;gap:8px;font-size:0.84rem;color:var(--text);cursor:pointer;user-select:none;}
+  .switch input{appearance:none;-webkit-appearance:none;width:34px;height:20px;border-radius:10px;
+                background:rgba(60,60,67,0.18);position:relative;cursor:pointer;margin:0;transition:background .15s;}
+  .switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+                       background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.25);transition:transform .15s;}
+  .switch input:checked{background:var(--gold-strong);}
+  .switch input:checked::after{transform:translateX(14px);}
+
+  /* lessons */
+  .lesson{margin:0;padding:20px 2px 14px;border-bottom:1px solid var(--sep);scroll-margin-top:110px;}
+  .lesson-h{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .lnum{font-size:0.68rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--gold);
+        background:var(--gold-tint);padding:3px 9px;border-radius:6px;white-space:nowrap;font-weight:700;}
+  .ltitle{font-size:1.15rem;font-weight:600;letter-spacing:-0.005em;}
+
+  .block{margin:4px 0 18px;}
+  .block-h{font-size:0.7rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-faint);
+           padding-bottom:6px;margin-bottom:2px;font-weight:600;}
+
+  .line{padding:6px 6px;border-radius:8px;display:flex;align-items:flex-start;gap:8px;
+        transition:background .15s;}
+  .line:hover{background:rgba(255,204,0,0.07);}
+  .line.now{background:var(--gold-tint);}
+  .txt{display:flex;flex-direction:column;min-width:0;}
+  .fr{font-size:1.18rem;line-height:1.7;}
+  .en{font-size:0.86rem;color:var(--text-dim);margin-top:1px;}
+  body.hide-en .en{display:none;}
+
+  /* controls */
+  .ctrls{flex:none;display:inline-flex;gap:4px;padding-top:1px;}
+  .ctrls-big{margin-left:auto;gap:6px;}
+  .play-btn,.loop-btn{width:21px;height:21px;border-radius:50%;border:none;padding:0;cursor:pointer;
+            display:inline-flex;align-items:center;justify-content:center;line-height:1;
+            background:rgba(60,60,67,0.07);color:var(--gold);transition:background .12s,transform .08s,color .12s;}
+  .play-btn{font-size:0.58rem;}
+  .loop-btn{font-size:0.78rem;color:var(--text-faint);}
+  .play-btn:hover,.loop-btn:hover{background:var(--gold-tint-strong);}
+  .play-btn:active,.loop-btn:active{transform:scale(0.9);}
+  .play-btn.playing{background:var(--gold-strong);color:#fff;}
+  .loop-btn.on{background:var(--gold-tint-strong);color:var(--gold);}
+
+  .lesson-play{width:29px;height:29px;border-radius:50%;border:none;cursor:pointer;
+               background:var(--gold-strong);color:#fff;font-size:0.72rem;
+               display:inline-flex;align-items:center;justify-content:center;
+               transition:background .12s,transform .08s;}
+  .lesson-play:hover{background:var(--gold);}
+  .lesson-play:active{transform:scale(0.92);}
+  .lesson-play.playing{background:#1c1c1e;}
+  .loop-big{width:29px;height:29px;font-size:1rem;}
+
+  /* dialogue bubbles */
+  .dialogue .turn{margin:3px 0;max-width:86%;}
+  .dialogue .turn-a{margin-right:auto;}
+  .dialogue .turn-b{margin-left:auto;flex-direction:row-reverse;}
+  .dialogue .turn .txt{padding:6px 12px;}
+  .dialogue .turn-a .txt{background:rgba(60,60,67,0.055);border-radius:15px 15px 15px 4px;}
+  .dialogue .turn-b .txt{background:var(--gold-tint);border-radius:15px 15px 4px 15px;text-align:right;}
+  .dialogue .turn.now{background:transparent;}
+  .dialogue .turn.now .txt{box-shadow:0 0 0 2px var(--gold-strong);}
+
+  .ex-line .fr{color:var(--text);}
+  .verse-line .fr{font-style:italic;color:var(--gold);}
+
+  /* known lessons */
+  .known-count{font-size:0.8rem;color:var(--text-dim);font-variant-numeric:tabular-nums;}
+  .chip-known{background:var(--gold-strong);color:#fff;}
+  .chip-known:hover{background:var(--gold);}
+  .lesson.known .lnum::after{content:" ✓";}
+  body.hide-known .lesson.known .block,
+  body.hide-known .lesson.known .note,
+  body.hide-known .lesson.known .ctrls-big{display:none;}
+  body.hide-known .lesson.known{padding:10px 2px;}
+  body.hide-known .lesson.known .lesson-h{margin-bottom:4px;}
+  body.hide-known .lesson.known .ltitle{color:var(--text-dim);font-weight:500;}
+
+  /* end-of-lesson footer */
+  .lesson-foot{margin-top:6px;padding-top:12px;border-top:1px dashed var(--sep);display:flex;flex-direction:column;gap:10px;}
+  .known-box{display:inline-flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-dim);cursor:pointer;user-select:none;width:max-content;}
+  .known-box input{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:0;border-radius:5px;
+                   border:1.5px solid rgba(60,60,67,0.3);background:#fff;cursor:pointer;display:inline-grid;place-content:center;
+                   transition:background .12s,border-color .12s;}
+  .known-box input::after{content:"✓";font-size:12px;font-weight:700;color:#fff;transform:scale(0);transition:transform .12s;}
+  .known-box input:checked{background:var(--gold-strong);border-color:var(--gold-strong);}
+  .known-box input:checked::after{transform:scale(1);}
+  .lesson.known .known-box{color:var(--gold);font-weight:600;}
+
+  textarea.note{width:100%;resize:none;overflow:hidden;min-height:44px;padding:9px 11px;border-radius:9px;
+                border:1px solid var(--sep);background:#fff;font:inherit;font-size:0.88rem;line-height:1.45;color:var(--text);}
+  textarea.note::placeholder{color:var(--text-faint);}
+  textarea.note:focus{outline:none;border-color:var(--gold-strong);box-shadow:0 0 0 3px var(--gold-tint);}
+
+  /* bottom panel */
+  .notes-panel{margin-top:30px;padding:18px;border-radius:12px;background:#fff;border:1px solid var(--sep);}
+  .panel-h{font-size:1.05rem;font-weight:600;}
+  .panel-sub{margin:4px 0 12px;font-size:0.85rem;color:var(--text-dim);}
+  .notes-panel textarea.note{min-height:80px;}
+  .panel-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;}
+  .btn{font:inherit;font-size:0.85rem;padding:6px 13px;border-radius:7px;border:1px solid var(--sep);
+       background:#fff;color:var(--text);cursor:pointer;transition:background .12s;}
+  .btn:hover{background:rgba(60,60,67,0.05);}
+  .btn-primary{background:var(--gold-strong);border-color:var(--gold-strong);color:#fff;font-weight:600;}
+  .btn-primary:hover{background:var(--gold);}
+  .btn-quiet{border-color:transparent;color:var(--text-dim);}
+  .panel-status{margin-left:auto;font-size:0.8rem;color:var(--text-faint);}
+
+  .foot{margin-top:36px;padding-top:14px;border-top:1px solid var(--sep);color:var(--text-faint);
+        font-size:0.76rem;text-align:center;}
+
+  @media (max-width:600px){
+    .dialogue .turn{max-width:96%;}
+  }
+  .block:empty{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Athenaze · Chapters 2–16</div>
+  <div class="title">Athenaze — Greek reader</div>
+  <div class="sub">Greek text with English, section by section</div>
+  </header>
+
+<div class="howto">
+  <b>Listening.</b> ▶ plays one line; ↻ loops it (tap ↻ again to stop looping). The big ⏵ in a chapter header plays the whole chapter and its ↻ loops it. Tap a playing button again, or press Esc, to stop. Audio isn't generated yet, so the buttons stay silent until it is.<br>
+  <b>English.</b> Use the switch in the bar to show or hide translations.<br>
+  <b>Progress &amp; notes.</b> Tick “I know this chapter” at the end of a chapter once it's solid — its number turns gold, and “Hide known” folds it away. Each chapter also has a notes box; write questions or corrections there, then use “Copy for Claude” at the bottom and paste into our chat. Ticks and notes are saved in this browser.
+</div>
+
+<div id="nav">
+  <div class="toolbar">
+    <label class="switch"><input type="checkbox" id="enToggle" checked> English</label>
+    <label class="switch"><input type="checkbox" id="hideKnown"> Hide known</label>
+    <span id="knownCount" class="known-count"></span>
+    <input type="text" id="jumpBox" placeholder="№" inputmode="numeric">
+  </div>
+  <div id="chips"></div>
+</div>
+<audio id="player" preload="none"></audio>
+
+<div id="reader"></div>
+
+<section id="notesPanel" class="notes-panel"></section>
+
+<p class="foot">Athenaze, chapters 2–16, from your dual readers · audio: to be added (Modern Greek TTS)</p>
+
+<script src="lessons-data.js"></script>
+<script src="athenaze-reader-notes.js"></script>
+</body>
+</html>
